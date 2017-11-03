@@ -4,7 +4,7 @@ var loadState = {
 			font: '30px Courier',
 			fill: '#ffffff'
 		});
-		game.load.audio('ost','sounds/ost.mp3');
+		game.load.audio('ost','sounds/ost2.mp3');
 		game.load.audio('jump', ['sounds/jump.mp3', 'sounds/jump.ogg']);
 		game.load.audio('die', ['sounds/die.mp3', 'sounds/die.ogg']);
 		game.load.audio('win', ['sounds/win.mp3', 'sounds/win.ogg']);
@@ -14,9 +14,9 @@ var loadState = {
 		game.load.spritesheet('Mario', "Sprites/spm.png", marioWidth, marioHeight, 15);
 		game.load.spritesheet('coin', "Sprites/coins.png", 103, 96, 6);
 		game.load.spritesheet('princess', "Sprites/Peach.png", 31, 70, 6);
-		game.load.spritesheet('barrel', "Sprites/Barrels.png", barrelWidth, barrelHeight, 8);
+		game.load.spritesheet('barrel', "Sprites/Barrels.png", barrelWidth, barrelHeight, 8);		
 	},
-	create: function() {
+	create: function() {				
 		game.state.start('menu');
 	}
 };

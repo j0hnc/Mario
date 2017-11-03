@@ -12,8 +12,8 @@ var princess;
 var barrels;
 var barrelWidth = 34;
 var barrelHeight = 39;
-var ost;
 var won = false;
+var ost;
 
 var mainState = {
 

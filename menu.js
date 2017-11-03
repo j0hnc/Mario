@@ -12,6 +12,6 @@ var menuState = {
 		wkey.onDown.addOnce(this.start, this);
 	},
 	start: function() {
-		game.state.start('play');
+		game.state.start('play');		
 	}
 };
