@@ -15,8 +15,14 @@ var menuState = {
 		});
 		var wkey = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		wkey.onDown.addOnce(this.start, this);
+		var button = game.add.button(80, 400, 'button', startGame, this, 2, 1, 0);
+		button.scale.setTo(0.13);
 	},
 	start: function() {
 		game.state.start('play');		
 	}
 };
+
+function startGame() {
+	menuState.start();
+}
