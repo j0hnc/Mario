@@ -1,19 +1,16 @@
-var platforms, mario, cursors, facing = '';
+var platforms, mario, princess;
+var ground, coins, coinsText;
+var barrels, quantCoins = 0;
+var cursors, ost, facing = '';
 var platformScl = 0.5;
 var platformWidth = 192 * platformScl;
 var platformHeight = 48 * platformScl;
 var marioScl = 0.2;
 var marioHeight = 224;
 var marioWidth = 150;
-var arrGround;
-var coins, coin, coinsTxt;
-var quantCoins = 0;
-var princess;
-var barrels;
 var barrelWidth = 34;
 var barrelHeight = 39;
 var won = false;
-var ost;
 
 var mainState = {
 
@@ -23,29 +20,31 @@ var mainState = {
 		ost.play();
 
 		game.physics.startSystem(Phaser.Physics.ARCADE);
+
 		cursors = game.input.keyboard.createCursorKeys();
 
-		arrGround = game.add.group();
-		arrGround.enableBody = true;
+		ground = game.add.group();
+		ground.enableBody = true;
 
 		for (var i = 0; i < 10; i++) {
-			var p = arrGround.create(i * 96, game.height - 26, 'platform');
+			var p = ground.create(i * 96, game.height - 26, 'platform');
 			p.scale.setTo(platformScl);
 			p.body.immovable = true;
 		}
 
-		bg = game.add.tileSprite(0, 0, 800, 600, 'background');
+		var bg = game.add.tileSprite(0, 0, 800, 600, 'background');
 
-		coinsTxt = game.add.text(16, 16, 'Coins: 0', {
+		coinsText = game.add.text(16, 16, 'Coins: 0', {
 			fontSize: '26px',
-			fill: '#000'
+			fill: '#000',
+			stroke: '#fff',
+			strokeThickness: 3
 		});
-
-		coinsTxt.stroke = '#fff';
-		coinsTxt.strokeThickness = 3;
 
 		barrels = game.add.group();
 		barrels.enableBody = true;
+		coins = game.add.group();
+		coins.enableBody = true;
 
 		platforms = game.add.group();
 		platforms.enableBody = true;
@@ -53,21 +52,16 @@ var mainState = {
 		platform.scale.setTo(platformScl);
 		platform.body.immovable = true;
 
-		coins = game.add.group();
-		coins.enableBody = true;
-
-		var hSpace = 120;
-		var wSpace = 0;
+		var hSpace = 120, wSpace = 0;
 		var w, h, j = 0;
 
 		for (var i = 1; i <= 15; i++) {
-
 			w = j * platformWidth + wSpace;
 			h = game.height - hSpace;
-			var platform = platforms.create(w, h, 'platform');
+			platform = platforms.create(w, h, 'platform');
 
-			if (i % 3 == 0) {
-				coin = coins.create(w + platformWidth / 2, h - platformHeight, 'coin');
+			if (i % 4 == 0) {
+				var coin = coins.create(w + platformWidth / 2, h - platformHeight, 'coin');
 				coin.scale.setTo(marioScl);
 				coin.animations.add('rotate', [0, 1, 2, 3, 4, 5], 12, true);
 				coin.animations.play('rotate');
@@ -92,14 +86,14 @@ var mainState = {
 		wSpace = 0;
 
 		for (var i = 1; i <= 8; i++) {
-			coin = coins.create(w + platformWidth / 2, h - platformHeight, 'coin');
+			var coin = coins.create(w + platformWidth / 2, h - platformHeight, 'coin');
 			coin.scale.setTo(marioScl);
 			coin.animations.add('rotate', [0, 1, 2, 3, 4, 5], 12, true);
 			coin.animations.play('rotate');
 			coin.body.immovable = true;
 			w = j * platformWidth + wSpace;
 			h = game.height - hSpace;
-			var platform = platforms.create(w, h, 'platform');
+			platform = platforms.create(w, h, 'platform');
 			wSpace += 80;
 			j++;
 			if (i % 4 == 0) {
@@ -130,18 +124,18 @@ var mainState = {
 		princess.animations.add('falling',[4,5],4,true);
 		princess.animations.play('animate');
 	},
+
 	update: function() {
 
-		if (won) { coins.kill(); }
-
+		// collisions
 		var hitPlatform = game.physics.arcade.collide(mario, platforms);
-		var hitGround = game.physics.arcade.collide(mario, arrGround);
+		var hitGround = game.physics.arcade.collide(mario, ground);
 		var hitPrincess = game.physics.arcade.collide(princess, platforms);
 		var marioPrincess = game.physics.arcade.collide(mario, princess, winsTheGame);
-		var barrelsHit = game.physics.arcade.collide(barrels, platforms, moveThem);
-		var barrelsCollide = game.physics.arcade.collide(barrels,barrels, collideb);
-		var bHitGround = game.physics.arcade.collide(barrels, arrGround);
-		var marioHitsBarrel = game.physics.arcade.collide(mario, barrels, theEnd);
+		var barrelsHit = game.physics.arcade.collide(barrels, platforms, moveBarrels);
+		var barrelsCollide = game.physics.arcade.collide(barrels,barrels, barrelCollision);
+		var bHitGround = game.physics.arcade.collide(barrels, ground);
+		var marioHitsBarrel = game.physics.arcade.collide(mario, barrels, finishGame);
 		var getCoin = game.physics.arcade.overlap(mario, coins, collectCoin, null, this);
 
 		for (var i = 0; i < barrels.children.length; i++) {
@@ -211,16 +205,15 @@ var mainState = {
 
 function collectCoin(mario, coin) {
 	coin.kill();
+	coinsText.text = 'Coins: ' + (++quantCoins);
 	var snd = game.add.audio('coinc');
-	snd.play();
-	quantCoins++;
-	coinsTxt.text = 'Coins: ' + quantCoins;
+	snd.play();	
 }
 
 var intervalID = window.setInterval(lunchBarrels, 3000);
 
 function lunchBarrels() {
-	if (won == false) {
+	if (!won) {
 		for (var i = 1; i <= 3; i++) {
 			var position = Math.random() * (game.width - platformWidth - 60);
 			var barrel = barrels.create(position, -10, 'barrel');
@@ -231,7 +224,7 @@ function lunchBarrels() {
 	}
 }
 
-function moveThem(barrel, platform) {
+function moveBarrels(barrel, platform) {
 	if (barrel.body.touching.left) {
 		barrel.body.velocity.x = 150;
 	} else if (barrel.body.touching.right) {
@@ -241,17 +234,25 @@ function moveThem(barrel, platform) {
 	}
 }
 
-function theEnd() {
+function finishGame() {
+	reset();
 	mainState.lose();
 }
 
 function winsTheGame() {
-	if (quantCoins >= 3) { // for testing
-		mainState.win();		
+	if (quantCoins >= 10) {
+		reset();
+		mainState.win();
 	}	
 }
 
-function collideb(barrel,barrel){
+function reset() {
+	quantCoins = 0;
+	coins.kill();	
+	barrels.kill();	
+}
+
+function barrelCollision(barrel,barrel){
 	if (barrel.body.touching.left) {
 		barrel.body.velocity.x = 150;
 	} else if (barrel.body.touching.right) {
