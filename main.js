@@ -2,12 +2,11 @@ var platforms, mario, princess;
 var ground, coins, coinsText;
 var barrels, quantCoins = 0;
 var cursors, ost, facing = '';
-var platformScl = 0.5;
+var platformScl = 0.5, marioScl = 0.2;
 var platformWidth = 192 * platformScl;
 var platformHeight = 48 * platformScl;
-var marioScl = 0.2;
-var marioHeight = 224;
-var marioWidth = 150;
+var marioWidth = 150 * marioScl;
+var marioHeight = 224 * marioScl;
 var barrelWidth = 34;
 var barrelHeight = 39;
 var won = false;
@@ -27,7 +26,7 @@ var mainState = {
 		ground.enableBody = true;
 
 		for (var i = 0; i < 10; i++) {
-			var p = ground.create(i * 96, game.height - 26, 'platform');
+			var p = ground.create(i * platformWidth, game.height - platformHeight, 'platform');
 			p.scale.setTo(platformScl);
 			p.body.immovable = true;
 		}
@@ -42,12 +41,13 @@ var mainState = {
 		});
 
 		barrels = game.add.group();
-		barrels.enableBody = true;
 		coins = game.add.group();
-		coins.enableBody = true;
-
 		platforms = game.add.group();
+
+		barrels.enableBody = true;		
+		coins.enableBody = true;		
 		platforms.enableBody = true;
+
 		var platform = platforms.create(game.width - platformWidth, 100, 'platform');
 		platform.scale.setTo(platformScl);
 		platform.body.immovable = true;
@@ -105,11 +105,11 @@ var mainState = {
 			platform.body.immovable = true;
 		}
 
-		mario = game.add.sprite(0, game.height - marioHeight * marioScl - 48, 'Mario');
+		mario = game.add.sprite(0, game.height - marioHeight - platformHeight, 'Mario');
+		mario.scale.setTo(marioScl);
 		game.physics.arcade.enable(mario);
 		mario.body.gravity.y = 300;
-		mario.body.collideWorldBounds = true;
-		mario.scale.setTo(marioScl);
+		mario.body.collideWorldBounds = true;				
 		mario.animations.add('walkL', [0, 1, 2], 7, true);
 		mario.animations.add('walkR', [3, 4, 5], 7, true);
 		mario.animations.add('JumpL', [7, 6, 8], 3, false);

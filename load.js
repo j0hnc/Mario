@@ -15,7 +15,7 @@ var loadState = {
 		game.load.image('bgLose', "Sprites/bgLose.jpg");
 		game.load.image('bgWins', "Sprites/bgWins.png");
 		game.load.image('button', "Sprites/start.png");
-		game.load.spritesheet('Mario', "Sprites/spm.png", marioWidth, marioHeight, 15);
+		game.load.spritesheet('Mario', "Sprites/spm.png", 150, 224, 15);
 		game.load.spritesheet('coin', "Sprites/coins.png", 103, 96, 6);
 		game.load.spritesheet('princess', "Sprites/Peach.png", 31, 70, 6);
 		game.load.spritesheet('barrel', "Sprites/Barrels.png", barrelWidth, barrelHeight, 8);		
