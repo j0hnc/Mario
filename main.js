@@ -1,7 +1,7 @@
 var platforms, mario, princess;
 var ground, coins, coinsText;
 var barrels, quantCoins = 0;
-var cursors, ost, facing = '';
+var cursors, mainAudio, facing = '';
 var platformScl = 0.5, marioScl = 0.2;
 var platformWidth = 192 * platformScl;
 var platformHeight = 48 * platformScl;
@@ -9,16 +9,18 @@ var marioWidth = 150 * marioScl;
 var marioHeight = 224 * marioScl;
 var barrelWidth = 34;
 var barrelHeight = 39;
-var won = false;
+var barrelsInterval, focus, flag = false;
 
 var mainState = {
 
-	create: function() {
+	create: function() {		
 
-		ost = game.add.audio('ost');
-		ost.play();
+		mainAudio = game.add.audio('mainAudio');
+		mainAudio.play();
+		
+		focus = setInterval(checkFocus, 200);
 
-		game.physics.startSystem(Phaser.Physics.ARCADE);
+		game.physics.startSystem(Phaser.Physics.ARCADE);		
 
 		cursors = game.input.keyboard.createCursorKeys();
 
@@ -31,14 +33,7 @@ var mainState = {
 			p.body.immovable = true;
 		}
 
-		var bg = game.add.tileSprite(0, 0, 800, 600, 'background');
-
-		coinsText = game.add.text(16, 16, 'Coins: 0', {
-			fontSize: '26px',
-			fill: '#000',
-			stroke: '#fff',
-			strokeThickness: 3
-		});
+		var bg = game.add.tileSprite(0, 0, 800, 600, 'background');		
 
 		barrels = game.add.group();
 		coins = game.add.group();
@@ -47,7 +42,11 @@ var mainState = {
 		barrels.enableBody = true;		
 		coins.enableBody = true;		
 		platforms.enableBody = true;
+		
+		barrelsInterval = window.setInterval(launchBarrels, 3000);
+		launchBarrels();
 
+		// princess platform
 		var platform = platforms.create(game.width - platformWidth, 100, 'platform');
 		platform.scale.setTo(platformScl);
 		platform.body.immovable = true;
@@ -55,6 +54,7 @@ var mainState = {
 		var hSpace = 120, wSpace = 0;
 		var w, h, j = 0;
 
+		// first set of platforms & some coins on them
 		for (var i = 1; i <= 15; i++) {
 			w = j * platformWidth + wSpace;
 			h = game.height - hSpace;
@@ -85,6 +85,7 @@ var mainState = {
 		hSpace = 190;
 		wSpace = 0;
 
+		// second set of platforms
 		for (var i = 1; i <= 8; i++) {
 			var coin = coins.create(w + platformWidth / 2, h - platformHeight, 'coin');
 			coin.scale.setTo(marioScl);
@@ -105,9 +106,10 @@ var mainState = {
 			platform.body.immovable = true;
 		}
 
+		// creating mario
 		mario = game.add.sprite(0, game.height - marioHeight - platformHeight, 'Mario');
 		mario.scale.setTo(marioScl);
-		game.physics.arcade.enable(mario);
+		game.physics.arcade.enable(mario);				
 		mario.body.gravity.y = 300;
 		mario.body.collideWorldBounds = true;				
 		mario.animations.add('walkL', [0, 1, 2], 7, true);
@@ -116,44 +118,52 @@ var mainState = {
 		mario.animations.add('JumpR', [10, 11, 9], 3, false);
 		mario.frame = 4;
 
+		// creating princess
 		princess = game.add.sprite(game.width - 50, 0, 'princess');
 		game.physics.arcade.enable(princess);
 		princess.body.gravity.y = 0;
 		princess.body.collideWorldBounds = true;
 		princess.animations.add('animate', [0, 1, 2, 3], 7, true);
-		princess.animations.add('falling',[4,5],4,true);
+		princess.animations.add('falling', [4, 5], 4, true);
 		princess.animations.play('animate');
+
+		coinsText = game.add.text(16, 16, 'Coins: 0', {
+			fontSize: '26px',
+			fill: '#000',
+			stroke: '#fff',
+			strokeThickness: 3
+		});
 	},
 
 	update: function() {
 
 		// collisions
-		var hitPlatform = game.physics.arcade.collide(mario, platforms);
-		var hitGround = game.physics.arcade.collide(mario, ground);
-		var hitPrincess = game.physics.arcade.collide(princess, platforms);
-		var marioPrincess = game.physics.arcade.collide(mario, princess, winsTheGame);
-		var barrelsHit = game.physics.arcade.collide(barrels, platforms, moveBarrels);
-		var barrelsCollide = game.physics.arcade.collide(barrels,barrels, barrelCollision);
-		var bHitGround = game.physics.arcade.collide(barrels, ground);
-		var marioHitsBarrel = game.physics.arcade.collide(mario, barrels, finishGame);
-		var getCoin = game.physics.arcade.overlap(mario, coins, collectCoin, null, this);
+		var hitsPlatform = game.physics.arcade.collide(mario, platforms);
+		var hitsGround = game.physics.arcade.collide(mario, ground);
+		game.physics.arcade.collide(princess, platforms);
+		game.physics.arcade.collide(mario, princess, winsTheGame);
+		game.physics.arcade.collide(barrels, platforms, barrelHitsPlatform);
+		game.physics.arcade.collide(barrels, barrels, barrelHitsBarrel);
+		game.physics.arcade.collide(barrels, ground);
+		game.physics.arcade.collide(mario, barrels, finishGame);
+		game.physics.arcade.overlap(mario, coins, collectCoin, null, this);
 
+		
+		// checks if the barrel goes out of the window
 		for (var i = 0; i < barrels.children.length; i++) {
 			var tmpBarrel = barrels.children[i];
-			if (tmpBarrel.body.position.x >= game.width || tmpBarrel.body.position.x <= 0) tmpBarrel.kill();
-			if (tmpBarrel.body.touching.right) {
-				tmpBarrel.body.velocity.x = -150;
-			} else if (tmpBarrel.body.touching.left) {
-				tmpBarrel.body.velocity.x = 150;
+			if (tmpBarrel.body.position.x >= game.width || tmpBarrel.body.position.x <= 0) {
+				tmpBarrel.kill();
 			}
 		}
 
+		// mario control
 		mario.body.velocity.x = 0;
 
 		if (cursors.left.isDown) {
 			mario.body.velocity.x = -200;
 			if (facing != 'left') {
-				if (mario.body.touching.down && (hitPlatform || hitGround)) {
+				if (mario.body.touching.down && (hitsPlatform || hitsGround)) {
 					mario.animations.play('walkL');
 				} else {
 					mario.animations.play("JumpL");
@@ -163,7 +173,7 @@ var mainState = {
 		} else if (cursors.right.isDown) {
 			mario.body.velocity.x = 200;
 			if (facing != 'right') {
-				if (mario.body.touching.down && (hitPlatform || hitGround)) {
+				if (mario.body.touching.down && (hitsPlatform || hitsGround)) {
 					mario.animations.play('walkR');
 				} else {
 					mario.animations.play("JumpR");
@@ -182,7 +192,7 @@ var mainState = {
 			}
 		}
 
-		if (cursors.up.isDown && mario.body.touching.down && (hitPlatform || hitGround)) {
+		if (cursors.up.isDown && mario.body.touching.down && (hitsPlatform || hitsGround)) {
 			var snd = game.add.audio("jump");
 			snd.volume = 0.2;
 			snd.play();
@@ -210,21 +220,17 @@ function collectCoin(mario, coin) {
 	snd.play();	
 }
 
-var intervalID = window.setInterval(lunchBarrels, 3000);
-
-function lunchBarrels() {
-	if (!won) {
-		for (var i = 1; i <= 3; i++) {
-			var position = Math.random() * (game.width - platformWidth - 60);
-			var barrel = barrels.create(position, -10, 'barrel');
-			barrel.body.gravity.y = 300;
-			barrel.animations.add('rotate', [0, 1, 2, 3, 4, 5, 6, 7], 7, true);
-			barrel.animations.play('rotate');
-		}
+function launchBarrels() {
+	for (var i = 1; i <= 4; i++) {
+		var position = Math.random() * (game.width - platformWidth - 60);
+		var barrel = barrels.create(position, -10, 'barrel');
+		barrel.body.gravity.y = 300;
+		barrel.animations.add('rotate', [0, 1, 2, 3, 4, 5, 6, 7], 7, true);
+		barrel.animations.play('rotate');
 	}
 }
 
-function moveBarrels(barrel, platform) {
+function changeDirection(barrel) {
 	if (barrel.body.touching.left) {
 		barrel.body.velocity.x = 150;
 	} else if (barrel.body.touching.right) {
@@ -232,6 +238,16 @@ function moveBarrels(barrel, platform) {
 	} else if (barrel.body.touching.down && barrel.body.velocity.x == 0) {
 		barrel.body.velocity.x = 150;
 	}
+}
+
+
+function barrelHitsPlatform(barrel, platform) {
+	changeDirection(barrel);
+}
+
+
+function barrelHitsBarrel(barrel, barrel) {
+	changeDirection(barrel);
 }
 
 function finishGame() {
@@ -250,14 +266,22 @@ function reset() {
 	quantCoins = 0;
 	coins.kill();	
 	barrels.kill();	
+	clearInterval(barrelsInterval); // stops launching barrels
+	clearInterval(focus);
 }
 
-function barrelCollision(barrel,barrel){
-	if (barrel.body.touching.left) {
-		barrel.body.velocity.x = 150;
-	} else if (barrel.body.touching.right) {
-		barrel.body.velocity.x = -150;
-	} else if (barrel.body.touching.down && barrel.body.velocity.x == 0) {
-		barrel.body.velocity.x = 150;
+// when the game tab is not active it stops launching barrels
+// imperfection: it takes a while to launch after 
+function checkFocus() {
+
+	if (!document.hasFocus()) {
+		clearInterval(barrelsInterval);
+		flag = true;
+	} else {
+		if (flag) {
+			barrelsInterval = window.setInterval(launchBarrels, 3000);
+			flag = false;
+		}
 	}
+
 }
