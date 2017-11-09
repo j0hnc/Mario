@@ -221,7 +221,7 @@ function collectCoin(mario, coin) {
 }
 
 function launchBarrels() {
-	for (var i = 1; i <= 1; i++) {
+	for (var i = 1; i <= 4; i++) {
 		var position = Math.random() * (game.width - platformWidth - 60);
 		var barrel = barrels.create(position, -10, 'barrel');
 		barrel.body.gravity.y = 300;
