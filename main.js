@@ -184,7 +184,7 @@ var mainState = {
 		mario.body.velocity.x = 0;
 
 		if (cursors.left.isDown) {
-			mario.body.velocity.x = -200;
+			mario.body.velocity.x = -180;
 			if (facing != 'left') {
 				if (mario.body.touching.down && (hitsPlatform || hitsGround)) {
 					mario.animations.play('walkL');
@@ -194,7 +194,7 @@ var mainState = {
 				facing = 'left';
 			}
 		} else if (cursors.right.isDown) {
-			mario.body.velocity.x = 200;
+			mario.body.velocity.x = 180;
 			if (facing != 'right') {
 				if (mario.body.touching.down && (hitsPlatform || hitsGround)) {
 					mario.animations.play('walkR');
@@ -225,7 +225,7 @@ var mainState = {
 			if (cursors.right.isDown) {
 				mario.animations.play("JumpR");
 			}
-			mario.body.velocity.y = -225;
+			mario.body.velocity.y = -250;
 		}
 	},
 	win: function() {
