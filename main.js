@@ -51,7 +51,7 @@ var mainState = {
 			function () {
 				donk.animations.play('shooting');
 			}
-		, 2600 );
+		, 2600);
 
 		// creating DK
 		donk = game.add.sprite(70, 13, 'kong');
@@ -61,7 +61,6 @@ var mainState = {
 		donk.scale.setTo(-1, 1);
 
 		(function () {
-			console.log('it worked');
 			donk.animations.play('shooting');
 		})();
 
