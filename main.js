@@ -9,7 +9,8 @@ var marioWidth = 150 * marioScl;
 var marioHeight = 224 * marioScl;
 var barrelWidth = 34;
 var barrelHeight = 39;
-var barrelsInterval, focus, flag = false;
+var focus, flag = false;
+var donkeyInterval, barrelsInteval;
 
 var mainState = {
 
@@ -43,7 +44,13 @@ var mainState = {
 		coins.enableBody = true;		
 		platforms.enableBody = true;
 		
-		barrelsInterval = window.setInterval(launchBarrels, 4000);
+		barrelsInterval = window.setInterval(launchBarrels, 3000);
+
+		donkeyInterval = window.setInterval (
+			function () {
+				donk.animations.play('shooting');
+			}
+		, 2600 );
 
 		// princess platform
 		var platform = platforms.create(game.width - platformWidth, 100, 'platform');
@@ -231,8 +238,7 @@ function collectCoin(mario, coin) {
 	snd.play();	
 }
 
-function launchBarrels() {
-	donk.animations.play('shooting');
+function launchBarrels() {	
 	for (var i = 1; i <= 4; i++) {
 		var position = Math.random() * (game.width - platformWidth - 60);
 		var barrel = barrels.create(position, -10, 'barrel');
@@ -281,6 +287,7 @@ function reset() {
 	barrels.kill();	
 	clearInterval(barrelsInterval); // stops launching barrels
 	clearInterval(focus);
+	clearInterval(donkeyInterval);
 }
 
 // when the game tab is not active it stops launching barrels
