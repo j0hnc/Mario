@@ -45,12 +45,25 @@ var mainState = {
 		platforms.enableBody = true;
 		
 		barrelsInterval = window.setInterval(launchBarrels, 3000);
+		launchBarrels();
 
 		donkeyInterval = window.setInterval (
 			function () {
 				donk.animations.play('shooting');
 			}
 		, 2600 );
+
+		// creating DK
+		donk = game.add.sprite(70, 13, 'kong');
+		donk.animations.add('charging', [0, 1, 2], 6, true);
+		donk.animations.add('shooting', [3, 4, 5], 6, false);
+		donk.animations.play('charging');
+		donk.scale.setTo(-1, 1);
+
+		(function () {
+			console.log('it worked');
+			donk.animations.play('shooting');
+		})();
 
 		// princess platform
 		var platform = platforms.create(game.width - platformWidth, 100, 'platform');
@@ -111,15 +124,7 @@ var mainState = {
 			platform.scale.setTo(platformScl);
 			platform.body.immovable = true;
 		}
-		
-		// creating DK
-		donk = game.add.sprite(70, 13, 'kong');
-		donk.animations.add('charging', [0, 1, 2], 6, true);
-		donk.animations.add('shooting',[3, 4, 5], 6, false);
-		donk.animations.play('charging');
-		donk.scale.setTo(-1,1);
-		
-		
+
 		// creating mario
 		mario = game.add.sprite(0, game.height - marioHeight - platformHeight, 'Mario');
 		mario.scale.setTo(marioScl);
@@ -141,7 +146,6 @@ var mainState = {
 		princess.animations.add('falling', [4, 5], 4, true);
 		princess.animations.play('animate');
 		
-
 		coinsText = game.add.text(16, 16, 'Coins: 0', {
 			fontSize: '26px',
 			fill: '#000',
@@ -241,7 +245,7 @@ function collectCoin(mario, coin) {
 }
 
 function launchBarrels() {	
-	for (var i = 1; i <= 3; i++) {
+	for (var i = 1; i <= 4; i++) {
 		var position = Math.random() * (game.width - platformWidth - 60);
 		var barrel = barrels.create(position, -10, 'barrel');
 		barrel.body.gravity.y = 300;
@@ -253,8 +257,6 @@ function launchBarrels() {
 function changeDirection(barrel) {
 	if (barrel.body.touching.left) {
 		barrel.body.velocity.x = 150;
-		barrel.body.velocity.x = -150;
-		barrel.scale.setTo(-1,1);
 	} else if (barrel.body.touching.right) {
 		barrel.body.velocity.x = -150;
 		barrel.scale.setTo(-1,1);
