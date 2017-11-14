@@ -44,7 +44,6 @@ var mainState = {
 		platforms.enableBody = true;
 		
 		barrelsInterval = window.setInterval(launchBarrels, 3000);
-		launchBarrels();
 
 		// princess platform
 		var platform = platforms.create(game.width - platformWidth, 100, 'platform');
