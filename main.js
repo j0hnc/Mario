@@ -126,6 +126,13 @@ var mainState = {
 		princess.animations.add('animate', [0, 1, 2, 3], 7, true);
 		princess.animations.add('falling', [4, 5], 4, true);
 		princess.animations.play('animate');
+		
+		// creating DK
+		donk = game.add.sprite(70, 13, 'kong');
+		donk.animations.add('charging', [0, 1, 2], 6, true);
+		donk.animations.add('shooting',[3, 4, 5], 6, false);
+		donk.animations.play('charging');
+		donk.scale.setTo(-1,1);
 
 		coinsText = game.add.text(16, 16, 'Coins: 0', {
 			fontSize: '26px',
@@ -136,6 +143,11 @@ var mainState = {
 	},
 
 	update: function() {
+		
+		// reset DK animations
+		if (donk.animations.frame == 5) {
+			donk.animations.play('charging');
+		}
 
 		// collisions
 		var hitsPlatform = game.physics.arcade.collide(mario, platforms);
@@ -221,6 +233,7 @@ function collectCoin(mario, coin) {
 }
 
 function launchBarrels() {
+	donk.animations.play('shooting');
 	for (var i = 1; i <= 4; i++) {
 		var position = Math.random() * (game.width - platformWidth - 60);
 		var barrel = barrels.create(position, -10, 'barrel');
