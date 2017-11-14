@@ -248,6 +248,7 @@ function changeDirection(barrel) {
 		barrel.body.velocity.x = 150;
 	} else if (barrel.body.touching.right) {
 		barrel.body.velocity.x = -150;
+		barrel.scale.setTo(-1,1);
 	} else if (barrel.body.touching.down && barrel.body.velocity.x == 0) {
 		barrel.body.velocity.x = 150;
 	}
