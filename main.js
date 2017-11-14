@@ -225,7 +225,7 @@ var mainState = {
 			if (cursors.right.isDown) {
 				mario.animations.play("JumpR");
 			}
-			mario.body.velocity.y = -250;
+			mario.body.velocity.y = -200;
 		}
 	},
 	win: function() {
