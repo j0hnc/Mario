@@ -1,4 +1,4 @@
-var platforms, mario, princess;
+var platforms, mario, princess, donk;
 var ground, coins, coinsText;
 var barrels, quantCoins = 0;
 var cursors, mainAudio, facing = '';
